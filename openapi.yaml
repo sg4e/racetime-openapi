@@ -99,7 +99,7 @@ paths:
         Returns a list of all completed (finished and cancelled) races in a category. This list is paginated, and sorted by each race's completion time (the ended_at field), most recent first. 10 races are returned per page.
 
         By default each race has the same data as the all races endpoint, excluding the `category` field. If you enable `show_entrants`, the races will additionally list entrant data in the same format used by the race detail endpoint.
-      operationId: getPastRaces
+      operationId: getPastRacesByCategory
       parameters:
       - name: category
         in: path
@@ -131,19 +131,7 @@ paths:
           content:
             application/json:
               schema:
-                # This object isn't documented in the racetime docs
-                type: object
-                properties:
-                  count:
-                    type: integer
-                    example: 2692
-                  num_pages:
-                    type: integer
-                    example: 270
-                  races:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Race'
+                $ref: '#/components/schemas/RacePagination'
   /{category}/leaderboards/data:
     get:
       summary: Category leaderboards
@@ -350,6 +338,47 @@ paths:
                     format: duration
                     description: Length of time where chat messages will only appear for race monitors
                     example: P0DT00H00M00S
+  /user/{user}/races/data:
+    get:
+      summary: Past user races
+      description: |
+        Returns a list of all finished (but not cancelled) races that a user has entered. This list is paginated, and sorted by each race's completion time (the `ended_at` field), most recent first. 10 races are returned per page.
+        
+        This endpoint behaves similarly to the past category races endpoint. Each race has the same data as the all races endpoint, unless you enable `show_entrants`. If enabled, the races will additionally list entrant data in the same format used by the race detail endpoint.
+      operationId: getPastRacesByUser
+      parameters:
+      - name: user
+        in: path
+        # Not documented, I tested and then wrote this:
+        description: The unique identifier for the user returned by the user search endpoint
+        example: b8GPMWwQpY31nEk0
+        required: true
+        schema:
+          type: string
+      - name: show_entrants
+        in: query
+        description:  If set to true, include entrant data for each race returned
+        example: true
+        required: false
+        schema:
+          type: boolean
+      - name: page
+        in: query
+        description:  Set to a positive integer (starting from 1) to retrieve paginated data
+        example: 1
+        required: false
+        schema:
+          type: integer
+      responses:
+        200:
+          headers:
+            X-Exact-Date:
+              $ref: '#/components/headers/DateTimeHeader'
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RacePagination'
   /user/search:
     get:
       summary: User search
@@ -489,6 +518,11 @@ components:
         info:
           type: string
           description: String containing additional information for race entrants, as set by the monitors
+        entrants:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Entrant'
         entrants_count:
           type: integer
           description: Total number of entrants in this race (including DQ/forfeits)
@@ -659,3 +693,17 @@ components:
         stream_override:
           type: boolean
           description: Boolean indicating if a moderator overrode the streaming requirement for this race entrant, allowing them to ready up without their stream being online.
+    RacePagination:
+      # This object isn't documented in the racetime docs
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 2692
+        num_pages:
+          type: integer
+          example: 270
+        races:
+          type: array
+          items:
+            $ref: '#/components/schemas/Race'
