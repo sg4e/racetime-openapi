@@ -298,6 +298,48 @@ paths:
                     format: duration
                     description: Length of time where chat messages will only appear for race monitors
                     example: P0DT00H00M00S
+  /user/search:
+    get:
+      summary: User search
+      description: Searches for registered users
+      operationId: getUsers
+      parameters:
+        - name: name
+          in: query
+          description: Match users whose name starts with the given string (case insensitive)
+          example: sg4e
+          required: false
+          schema:
+            type: string
+        - name: scrim
+          in: query
+          description: Match users with the given discriminator string (should be a set of four digits, e.g. '0844'). Exact match only.
+          example: 4461
+          required: false
+          schema:
+            type: string
+        - name: term
+          in: query
+          description: Can be a name, partial name, or a name and discriminator (given in the form 'Name#1234'). Match users with the given data.
+          example: sg4e#4461
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          headers:
+            X-Exact-Date:
+              $ref: '#/components/headers/DateTimeHeader'
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
 components:
   headers:
     DateTimeHeader:

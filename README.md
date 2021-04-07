@@ -8,4 +8,4 @@
 - [x] Category leaderboards `<category>/leaderboards/data`
 - [x] Race detail `<category>/<race>/data`
 - [ ] Past user races `user/<user>/races/data`
-- [ ] User search `user/search`
+- [x] User search `user/search`
