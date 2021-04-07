@@ -154,6 +154,150 @@ paths:
                                 description: The number of times the user has entered into recorded races for this goal (including DNF/DQ results)
                                 example: 42
                               # the API also returns a best_time ISO duration, but I don't see this documented anywhere
+  /{category}/{race}/data:
+    get:
+      summary: Race detail
+      description: |
+        This endpoint covers everything you might want to know about a race. All the data shown on the race page, except for chat messages, is provided. A full breakdown of entrants is also here, which is sorted by race status and finish position, as appropriate.
+        
+        **Note:** For races in progress, the timer is not part of the API response, since the API is cached it would be impossible to update this in real-time. To work out the timer, you should use the value of `started_at` (and the `X-Exact-Date` header to account for clock sync inaccuracy - see above) and `ended_at` (if the race has concluded).
+      operationId: getRaceDetails
+      parameters:
+        - name: category
+          in: path
+          description: the category slug
+          example: ootr
+          required: true
+          schema:
+            type: string
+        - name: race
+          in: path
+          description: the race room identifier
+          example: jolly-twinrova-3940
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          headers:
+            X-Exact-Date:
+              $ref: '#/components/headers/DateTimeHeader'
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Race'
+                properties:
+                  version:
+                    type: integer
+                    description: Integer indicating the data's version. This is incremented whenever a race changes.
+                    example: 45
+                  websocket_url:
+                    type: string
+                    format: url
+                    description: URL of the race WebSocket, used by the frontend for chat messages and real-time updates
+                    example: /ws/race/jolly-twinrova-3940
+                  websocket_bot_url:
+                    type: string
+                    format: url
+                    description: URL of the WebSocket for category bots
+                    example: /ws/o/bot/jolly-twinrova-3940
+                  websocket_oauth_url:
+                    type: string
+                    format: url
+                    description: URL of the WebSocket for OAuth2-authenticated user connections. Used by third-party applications.
+                    example: /ws/o/race/jolly-twinrova-3940
+                  entrants:
+                    type: array
+                    description: The entrants list, given as an array. Ordered by race status, then by finish position (if applicable), then by score (if available), and finally by name.
+                    items:
+                      $ref: '#/components/schemas/Entrant'
+                  opened_at:
+                    type: string
+                    format: date-time
+                    description: Date/time when the race was first created
+                    example: |-
+                      2021-04-06T22:05:59.493Z
+                  start_delay:
+                    type: string
+                    format: duration
+                    description: The time allocated for the countdown, i.e. time lapse between the last entrant readying up and the race starting
+                    example: P0DT00H00M15S
+                  started_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    description: Date/time when the race started, or null if it hasn't started yet
+                    example: |-
+                      2021-04-06T23:00:34.767Z
+                  ended_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    description: Date/time when the race ended, or null if it hasn't finished yet
+                    example: |-
+                      2021-04-06T23:50:34.767Z
+                  cancelled_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    description: |-
+                      Date/time when the race was cancelled, or null if it hasn't been cancelled. Note: a race may be cancelled at any point before it's finished. If it was cancelled before the race started, `started_at` and `ended_at` will not be set. If it was cancelled after the race started, `started_at` will be set and `ended_at` will be equal to `cancelled_at`.
+                    example: |-
+                      2021-04-06T23:50:34.767Z
+                  unlisted:
+                    type: boolean
+                    description: Boolean indicating an unlisted race (hidden from category view except for moderators)
+                  time_limit:
+                    type: string
+                    format: duration
+                    description: The maximum amount of time the race may be in progress for once it starts
+                    example: P1DT00H00M00S
+                  streaming_required:
+                    type: boolean
+                    description: Boolean indiciating if entrants are required to stream in this race
+                  auto_start:
+                    type: boolean
+                    description: Boolean indicating if the race will start automatically when all entrants are ready
+                  opened_by:
+                    allOf:
+                    - $ref: '#/components/schemas/User'
+                    nullable: true
+                    description: User data blob for the user who opened the race room, or null if the room was opened by a bot. If present, this user is always a race monitor.
+                  monitors:
+                    type: array
+                    description: Array of user data blobs for race monitors (in addition to the room opener) in this race
+                    items:
+                      $ref: '#/components/schemas/User'
+                  recordable:
+                    type: boolean
+                    description: Boolean indicating a race can be recorded once it's finished. A moderator may still opt to not record the race.
+                  recorded:
+                    type: boolean
+                    description: Boolean indicating if the race has been recorded by a moderator
+                  recorded_by:
+                    allOf:
+                    - $ref: '#/components/schemas/User'
+                    nullable: true
+                    description: User data blob of the moderator who recorded this race
+                  allow_comments:
+                    type: boolean
+                    description: Boolean indicating if users may add a glib remark after they finish racing
+                  hide_comments:
+                    type: boolean
+                    description: Boolean indicating if entrant comments will be hidden until the race is finished (or cancelled)
+                  allow_midrace_chat:
+                    type: boolean
+                    description: Boolean indicating if users may chat while the race is in progress (does not affect monitors or moderators)
+                  allow_non_entrant_chat:
+                    type: boolean
+                    description: Boolean indicating if users who have not entered the race may chat while the race is in progress (does not affect moderators)
+                  chat_message_delay:
+                    type: string
+                    format: duration
+                    description: Length of time where chat messages will only appear for race monitors
+                    example: P0DT00H00M00S
 components:
   headers:
     DateTimeHeader:
@@ -167,6 +311,8 @@ components:
   schemas:
     User:
       type: object
+      nullable: true
+      # Having to declare nullable here instead of where the User schema is referenced is a deficiency of OpenAPI 3.0.1, see https://stackoverflow.com/questions/40920441/how-to-specify-a-property-can-be-null-or-a-reference-with-swagger . It is to be fixed in 3.1
       properties:
         id:
           type: string
@@ -231,7 +377,7 @@ components:
         name:
           type: string
           description: The race's unique name, based on the category and a randomly assigned slug
-          example: ootr/odd-pit-4755
+          example: ootr/jolly-twinrova-3940
         category:
           $ref: '#/components/schemas/Category'
         status:
@@ -239,11 +385,11 @@ components:
         url:
           type: string
           description: URL for the main race page
-          example: /ootr/odd-pit-4755
+          example: /ootr/jolly-twinrova-3940
         data_url:
           type: string
           description: URL for the race data endpoint, which you can use to obtain more detailed race information
-          example: /ootr/odd-pit-4755/data
+          example: /ootr/jolly-twinrova-3940/data
         goal:
           $ref: '#/components/schemas/Goal'
         info:
@@ -341,3 +487,81 @@ components:
           type: boolean
           description: A boolean indicating if the goal name was custom, or one of the pre-set category goals
           example: false
+    Entrant:
+      type: object
+      description: An object describing a person in a race
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        status:
+          type: object
+          description: An object describing the entrant's current status
+          properties:
+            value:
+              type: string
+              description: A machine-parsable status text
+              enum:
+              - requested
+              - invited
+              - declined
+              - ready
+              - not_ready
+              - in_progress
+              - done
+              - dnf
+              - dq
+              example: in_progress
+            verbose_value:
+              type: string
+              description: A user-parsable status text
+              example: In progress
+            help_text:
+              type: string
+              description: Describes the status
+              example: Did not finish the race
+        finish_time:
+          type: string
+          format: duration
+          nullable: true
+          description: The user's final finish time, or null if they've not finished
+          example: P0DT04H06M33.007597S
+        finished_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date/time when the user finished, or null if they've not finished
+          example: |-
+            2021-04-07T03:07:07.774Z
+        place:
+          type: integer
+          nullable: true
+          description: Integer indicating what position the user finished in
+          example: 1
+        place_ordinal:
+          type: string
+          nullable: true
+          description: String ordinal version of `place`
+          example: 1st
+        score:
+          type: integer
+          nullable: true
+          # Though not in the documentation, the endpoint can return null for this value.
+          description: Integer amount of points earned by this entrant on the relevant leaderboard. Note that this is **not** the entrant's current score (unless the race is in progress), it is the score they had when they *entered* the race, not after.
+          example: 2942
+        score_change:
+          type: integer
+          nullable: true
+          description: Integer amount of points gained/lost as a result of this race, or null (not zero!) if race is not recorded
+        comment:
+          type: string
+          nullable: true
+          description: A string containing a pithy comeback supplied by the user post-race, or null if they have no comment. If `hide_comments` is true and the race has not concluded, this field is always null.
+        has_comment:
+          type: boolean
+          description: A boolean indicating if the entrant has made a comment. This field is unaffected by the `hide_comments` setting.
+        stream_live:
+          type: boolean
+          description: Boolean indicating if the user's stream is currently live. This is updated in real-time while a race is in progress, but once an entrant has finished, forfeited or been disqualified it will not be updated.
+        stream_override:
+          type: boolean
+          description: Boolean indicating if a moderator overrode the streaming requirement for this race entrant, allowing them to ready up without their stream being online.
