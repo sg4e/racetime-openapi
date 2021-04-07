@@ -1,0 +1,255 @@
+openapi: 3.0.1
+info:
+  title: Racetime.gg API
+  description: 'API for the open-source race server.'
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+  version: 1.0.0
+servers:
+  - url: https://racetime.gg
+externalDocs:
+  description: Racetime.gg website
+  url: https://racetime.gg
+paths:
+  /races/data:
+    get:
+      summary: All races
+      description: Returns a list of all open and ongoing races
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  races:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Race'
+components:
+  schemas:
+    Race:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The race's unique name, based on the category and a randomly assigned slug
+          example: ootr/odd-pit-4755
+        category:
+          $ref: '#/components/schemas/Category'
+        status:
+          $ref: '#/components/schemas/Status'
+        url:
+          type: string
+          description: URL for the main race page
+          example: /ootr/odd-pit-4755
+        data_url:
+          type: string
+          description: URL for the race data endpoint, which you can use to obtain more detailed race information
+          example: /ootr/odd-pit-4755/data
+        goal:
+          $ref: '#/components/schemas/Goal'
+        info:
+          type: string
+          description: String containing additional information for race entrants, as set by the monitors
+        entrants_count:
+          type: integer
+          description: Total number of entrants in this race (including DQ/forfeits)
+          example: 5
+        entrants_count_finished:
+          type: integer
+          description: Total number of entrants that have finished (not counting DQ/forfeits)
+          example: 0
+        entrants_count_inactive:
+          type: integer
+          description: Total number of entrants that have been DQed or forfieted
+          example: 1
+        opened_at:
+          type: string
+          format: date-time
+          description: Date/time when the race was first created
+          example: |-
+            2021-04-06T04:04:43.783Z
+        started_at:
+          type: string
+          nullable: true
+          format: date-time
+          description: Date/time when the race started, or null if it hasn't started yet
+          example: |-
+            2021-04-06T04:09:51.174Z
+        time_limit:
+          type: string
+          format: duration
+          description: The maximum amount of time the race may be in progress for once it starts (ISO 8601 duration)
+          example: |-
+            P1DT00H00M00S
+    Category:
+      type: object
+      description: An object giving brief information about the category
+      properties:
+        name:
+          type: string
+          description: The name of the category
+          example: |- 
+            The Legend of Zelda: Ocarina of Time Randomizer
+        short_name:
+          type: string
+          description: An abbreviated name
+          example: OoTR
+        slug:
+          type: string
+          description: Unique category slug (part of the URL)
+          example: ootr
+        url:
+          type: string
+          description: URL for the main category page
+          example: /ootr
+        data_url:
+          type: string
+          description: URL for the category data endpoint, which you can use to obtain more detailed category information
+          example: /ootr/data
+    Status:
+      type: object
+      description: An object giving brief information about the race's status
+      properties:
+        value:
+          type: string
+          description: A machine-parsable status text
+          enum:
+          - open
+          - invitational
+          - pending
+          - in_progress
+          - finished
+          - cancelled
+          example: in_progress
+        verbose_value:
+          type: string
+          description: A user-parsable status text
+          example: In progress
+        help_text:
+          type: string
+          description: Describes the status
+          example: Race is in progress
+    Goal:
+      type: object
+      description: An object describing the race goal
+      properties:
+        name:
+          type: string
+          description: A string value indicating the current goal
+          example: Any%
+        custom:
+          type: boolean
+          description: A boolean indicating if the goal name was custom, or one of the pre-set category goals
+          example: false
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        petId:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          format: int32
+        shipDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          description: Order Status
+          enum:
+          - placed
+          - approved
+          - delivered
+        complete:
+          type: boolean
+          default: false
+      xml:
+        name: Order
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phone:
+          type: string
+        userStatus:
+          type: integer
+          description: User Status
+          format: int32
+      xml:
+        name: User
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+      xml:
+        name: Tag
+    Pet:
+      required:
+      - name
+      - photoUrls
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        category:
+          $ref: '#/components/schemas/Category'
+        name:
+          type: string
+          example: doggie
+        photoUrls:
+          type: array
+          xml:
+            name: photoUrl
+            wrapped: true
+          items:
+            type: string
+        tags:
+          type: array
+          xml:
+            name: tag
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/Tag'
+        status:
+          type: string
+          description: pet status in the store
+          enum:
+          - available
+          - pending
+          - sold
+      xml:
+        name: Pet
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
