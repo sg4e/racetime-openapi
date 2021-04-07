@@ -18,6 +18,9 @@ paths:
       description: Returns a list of all open and ongoing races
       responses:
         200:
+          headers:
+            X-Exact-Date:
+              $ref: '#/components/headers/DateTimeHeader'
           description: successful operation
           content:
             application/json:
@@ -29,6 +32,15 @@ paths:
                     items:
                       $ref: '#/components/schemas/Race'
 components:
+  headers:
+    DateTimeHeader:
+      schema:
+        type: string
+        format: date-time
+      description: |
+        As this site is about racing, timing is important to get right. Along with the JSON response, all API endpoints will also have an X-Exact-Date HTTP response header, which will contain the current date/time in standard ISO format, precise to the last millisecond. You can use this to account for differences between the server's clock and your local one, plus latency to the server.
+        
+        Although datestamps are given with millisecond prevision, given the nature of the web and latency you should not assume the data given is actually accurate to that degree. As a rule, when displaying data times should be rounded to the nearest decisecond, at most.
   schemas:
     Race:
       type: object
