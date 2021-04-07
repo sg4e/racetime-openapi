@@ -14,6 +14,8 @@ externalDocs:
 paths:
   /races/data:
     get:
+      tags:
+        - racetime
       summary: All races
       description: Returns a list of all open and ongoing races
       responses:
@@ -34,6 +36,8 @@ paths:
                       $ref: '#/components/schemas/Race'
   /{category}/data:
     get:
+      tags:
+        - racetime
       summary: Category detail
       description: This endpoint includes all the basic information about the category shown on the webpage, except for past races. Current races are given in a summarised format, full race information must be retrieved individually.
       operationId: getCategory
@@ -96,6 +100,8 @@ paths:
                       $ref: '#/components/schemas/Race'
   /{category}/races/data:
     get:
+      tags:
+        - racetime
       summary: Past category races
       description: |
         Returns a list of all completed (finished and cancelled) races in a category. This list is paginated, and sorted by each race's completion time (the ended_at field), most recent first. 10 races are returned per page.
@@ -136,6 +142,8 @@ paths:
                 $ref: '#/components/schemas/RacePagination'
   /{category}/leaderboards/data:
     get:
+      tags:
+        - racetime
       summary: Category leaderboards
       description: Provides category leaderboard data
       operationId: getLeaderboards
@@ -200,6 +208,8 @@ paths:
                               # the API also returns a best_time ISO duration, but I don't see this documented anywhere
   /{category}/{race}/data:
     get:
+      tags:
+        - racetime
       summary: Race detail
       description: |
         This endpoint covers everything you might want to know about a race. All the data shown on the race page, except for chat messages, is provided. A full breakdown of entrants is also here, which is sorted by race status and finish position, as appropriate.
@@ -343,6 +353,8 @@ paths:
                     example: P0DT00H00M00S
   /user/{user}/races/data:
     get:
+      tags:
+        - racetime
       summary: Past user races
       description: |
         Returns a list of all finished (but not cancelled) races that a user has entered. This list is paginated, and sorted by each race's completion time (the `ended_at` field), most recent first. 10 races are returned per page.
@@ -384,6 +396,8 @@ paths:
                 $ref: '#/components/schemas/RacePagination'
   /user/search:
     get:
+      tags:
+        - racetime
       summary: User search
       description: Searches for registered users
       operationId: getUsers
