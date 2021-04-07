@@ -42,6 +42,66 @@ components:
         
         Although datestamps are given with millisecond prevision, given the nature of the web and latency you should not assume the data given is actually accurate to that degree. As a rule, when displaying data times should be rounded to the nearest decisecond, at most.
   schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: A unique identifier for this user. Will remain the same even if the user changes their display name. IDs are always strings. A typical user ID is a string of 16 alphanumeric characters.
+          example: fR42gLweew3pQlm4
+        full_name:
+          type: string
+          description: A unique user display name, including their original display name and their scrim. Note that some users may not have a scrim, in which case `full_name` will be the same as `name`.
+          example: Mario#5527
+        name:
+          type: string
+          description: Just the user's display name. If you don't need an unambigiously unique name for the user, you can use this field. Otherwise you should use `full_name`.
+          example: Mario
+        discriminator:
+          type: string
+          nullable: true
+          description: |-
+            The discriminator (or scrim) is used to disambiguate identical display names. It is typically set to a random 4-digit string. Note that the scrim may start with 0 (e.g. "Bowser#0340"), so you should not treat this field as an integer. May be set to null if the user has no discriminator.
+          example: 5527
+        url:
+          type: string
+          format: url
+          description: URL for the user's profile page
+          example: /user/fR42gLweew3pQlm4
+        avatar:
+          type: string
+          format: url
+          nullable: true
+          description: URL for the user's avatar picture, or null if the user has no avatar
+          example: /media/mario.png
+        pronouns:
+          type: string
+          nullable: true
+          description: string indicating the user's preferred pronouns, or null if user has not set any pronouns
+          example: he/him
+        flair:
+          type: string
+          description: |
+            The user's current flair, as a set of space-separated strings. This is used to indicate how the user should be styled. It should **not** be used to determine logical information, e.g. if a user is a moderator.
+            
+            Note that flairs are *context-sensitive*. If you're getting category data for example, you'll never see a "monitor" flair since this only applies in the context of race rooms.
+          example: monitor supporter
+        twitch_name:
+          type: string
+          nullable: true
+          description: The user's connected Twitch account name, capitalised according to how they've set it on Twitch. Will be null if the user has no connected Twitch account.
+          example: ItsaMeMario
+        twitch_channel:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URI for the user's connected Twitch account channel page. Will be null if the user has no connected Twitch account.
+          example: |-
+            https://www.twitch.tv/itsamemario
+        can_moderate:
+          type: boolean
+          description: A boolean indicating if the user is a moderator. This is context-sensitive, as moderator status varies per category. If there is no category in context, this will always be false (even if user is staff).
+          example: false
     Race:
       type: object
       properties:
