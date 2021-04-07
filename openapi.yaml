@@ -92,6 +92,68 @@ paths:
                     description: Array of races that are currently open or in progress, in summary form. Each race's information is the same as what's given in the all races endpoint, excluding the category field.
                     items:
                       $ref: '#/components/schemas/Race'
+  /{category}/leaderboards/data:
+    get:
+      summary: Category leaderboards
+      description: Provides category leaderboard data
+      operationId: getLeaderboards
+      parameters:
+        - name: category
+          in: path
+          description: the category slug
+          example: ootr
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          headers:
+            X-Exact-Date:
+              $ref: '#/components/headers/DateTimeHeader'
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  leaderboards:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        goal:
+                          type: string
+                          description: String name of the goal
+                          example: Any%
+                        num_ranked:
+                          type: integer
+                          description: Total number of ranked participants for this leaderboard
+                          example: 479
+                        rankings:
+                          type: array
+                          description: An ordered array of participants, starting from the highest ranked to the lowest
+                          items:
+                            type: object
+                            properties:
+                              user:
+                                $ref: '#/components/schemas/User'
+                              place:
+                                type: integer
+                                description: The user's ranking as an integer, counting from 1 onward
+                                example: 1
+                              place_ordinal:
+                                type: string
+                                description: Same as place except it's an ordinal string, i.e. "1st", "2nd", "3rd", and so on
+                                example: 1st
+                              score:
+                                type: integer
+                                description: The user's calculated score, always a positive integer. Users who have never played start with a score of 833.
+                                example: 3413
+                              times_raced:
+                                type: integer
+                                description: The number of times the user has entered into recorded races for this goal (including DNF/DQ results)
+                                example: 42
+                              # the API also returns a best_time ISO duration, but I don't see this documented anywhere
 components:
   headers:
     DateTimeHeader:
