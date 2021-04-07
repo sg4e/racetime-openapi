@@ -25,6 +25,7 @@ paths:
           content:
             application/json:
               schema:
+                title: Races
                 type: object
                 properties:
                   races:
@@ -53,6 +54,7 @@ paths:
           content:
             application/json:
               schema:
+                title: CategoryDetails
                 allOf:
                   - $ref: '#/components/schemas/Category'
                 properties:
@@ -154,11 +156,13 @@ paths:
           content:
             application/json:
               schema:
+                title: Leaderboards
                 type: object
                 properties:
                   leaderboards:
                     type: array
                     items:
+                      title: Leaderboard
                       type: object
                       properties:
                         goal:
@@ -226,6 +230,7 @@ paths:
           content:
             application/json:
               schema:
+                title: RaceDetails
                 allOf:
                   - $ref: '#/components/schemas/Race'
                 properties:
@@ -415,6 +420,7 @@ paths:
           content:
             application/json:
               schema:
+                title: Users
                 type: object
                 properties:
                   results:
