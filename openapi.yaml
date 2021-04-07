@@ -301,7 +301,7 @@ paths:
                     example: P1DT00H00M00S
                   streaming_required:
                     type: boolean
-                    description: Boolean indiciating if entrants are required to stream in this race
+                    description: Boolean indicating if entrants are required to stream in this race
                   auto_start:
                     type: boolean
                     description: Boolean indicating if the race will start automatically when all entrants are ready
