@@ -306,8 +306,7 @@ paths:
                     type: boolean
                     description: Boolean indicating if the race will start automatically when all entrants are ready
                   opened_by:
-                    allOf:
-                    - $ref: '#/components/schemas/User'
+                    $ref: '#/components/schemas/User'
                     nullable: true
                     description: User data blob for the user who opened the race room, or null if the room was opened by a bot. If present, this user is always a race monitor.
                   monitors:
@@ -322,8 +321,7 @@ paths:
                     type: boolean
                     description: Boolean indicating if the race has been recorded by a moderator
                   recorded_by:
-                    allOf:
-                    - $ref: '#/components/schemas/User'
+                    $ref: '#/components/schemas/User'
                     nullable: true
                     description: User data blob of the moderator who recorded this race
                   allow_comments:
