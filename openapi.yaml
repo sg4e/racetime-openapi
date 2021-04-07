@@ -31,6 +31,67 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Race'
+  /{category}/data:
+    get:
+      summary: Category detail
+      description: This endpoint includes all the basic information about the category shown on the webpage, except for past races. Current races are given in a summarised format, full race information must be retrieved individually.
+      operationId: getCategory
+      parameters:
+        - name: category
+          in: path
+          description: the category slug
+          example: ootr
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          headers:
+            X-Exact-Date:
+              $ref: '#/components/headers/DateTimeHeader'
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Category'
+                properties:
+                  image:
+                    type: string
+                    format: url
+                    nullable: true
+                    description: URL for the uploaded image to represent this category, or null if no image is set
+                    example: |-
+                      https://racetime.gg/media/zootr.png
+                  info:
+                    type: string
+                    format: html
+                    description: Category information blurb, as HTML. This is what appears in the sidebar on the main category page.
+                  streaming_required:
+                    type: boolean
+                    description: Boolean indicating if streaming is required in this category. Moderators may override this on a per-race basis.
+                    example: false
+                  owners:
+                    type: array
+                    description: Array of user data blobs for users who have ownership rights on the category
+                    items:
+                      $ref: '#/components/schemas/User'
+                  moderators:
+                    type: array
+                    description: Array of user data blobs for users who can moderate the category
+                    items:
+                      $ref: '#/components/schemas/User'
+                  goals:
+                    type: array
+                    description: Array of strings naming the active goals in this category
+                    items:
+                      type: string
+                      example: Any%
+                  current_races:
+                    type: array
+                    description: Array of races that are currently open or in progress, in summary form. Each race's information is the same as what's given in the all races endpoint, excluding the category field.
+                    items:
+                      $ref: '#/components/schemas/Race'
 components:
   headers:
     DateTimeHeader:
@@ -159,6 +220,7 @@ components:
             P1DT00H00M00S
     Category:
       type: object
+      nullable: true
       description: An object giving brief information about the category
       properties:
         name:
