@@ -4,7 +4,7 @@
 
 - [x] All races `races/data`
 - [x] Category detail `<category>/data`
-- [ ] Past category races `<category>/races/data`
+- [x] Past category races `<category>/races/data`
 - [x] Category leaderboards `<category>/leaderboards/data`
 - [x] Race detail `<category>/<race>/data`
 - [ ] Past user races `user/<user>/races/data`

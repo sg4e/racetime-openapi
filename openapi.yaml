@@ -92,6 +92,58 @@ paths:
                     description: Array of races that are currently open or in progress, in summary form. Each race's information is the same as what's given in the all races endpoint, excluding the category field.
                     items:
                       $ref: '#/components/schemas/Race'
+  /{category}/races/data:
+    get:
+      summary: Past category races
+      description: |
+        Returns a list of all completed (finished and cancelled) races in a category. This list is paginated, and sorted by each race's completion time (the ended_at field), most recent first. 10 races are returned per page.
+
+        By default each race has the same data as the all races endpoint, excluding the `category` field. If you enable `show_entrants`, the races will additionally list entrant data in the same format used by the race detail endpoint.
+      operationId: getPastRaces
+      parameters:
+      - name: category
+        in: path
+        description: the category slug
+        example: ootr
+        required: true
+        schema:
+          type: string
+      - name: show_entrants
+        in: query
+        description:  If set to true, include entrant data for each race returned
+        example: true
+        required: false
+        schema:
+          type: boolean
+      - name: page
+        in: query
+        description:  Set to a positive integer (starting from 1) to retrieve paginated data
+        example: 2
+        required: false
+        schema:
+          type: integer
+      responses:
+        200:
+          headers:
+            X-Exact-Date:
+              $ref: '#/components/headers/DateTimeHeader'
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                # This object isn't documented in the racetime docs
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 2692
+                  num_pages:
+                    type: integer
+                    example: 270
+                  races:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Race'
   /{category}/leaderboards/data:
     get:
       summary: Category leaderboards
