@@ -26,6 +26,6 @@ for lang in dart-dio-next python typescript typescript-nestjs; do
 done
 
 echo Making docs
-for lang in html; do
+for lang in html2; do
   make_sdk $lang "-documentation"
 done
