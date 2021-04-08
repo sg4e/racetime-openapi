@@ -18,6 +18,7 @@ paths:
         - racetime
       summary: All races
       description: Returns a list of all open and ongoing races
+      operationId: getRace
       responses:
         200:
           headers:
