@@ -1,23 +1,26 @@
 openapi: 3.0.1
 info:
   title: Racetime.gg API
-  description: 'API for the open-source race server.'
+  description: 'API for the open-source race server: https://racetime.gg/'
   license:
     name: MIT License
     url: https://opensource.org/licenses/MIT
-  version: 1.0.0
+  version: 0.2.1
 servers:
   - url: https://racetime.gg
 externalDocs:
-  description: Racetime.gg website
-  url: https://racetime.gg
+  description: Racetime.gg Public API wiki
+  url: https://github.com/racetimeGG/racetime-app/wiki/Public-API-endpoints
 paths:
   /races/data:
     get:
       tags:
         - racetime
       summary: All races
-      description: Returns a list of all open and ongoing races
+      description: |-
+        Returns a list of all open and ongoing races
+
+        **OpenAPI Note:** This endpoint does **not** include an `entrants` field in its response. Some documentation generated from this specification may erroneously state that it includes this field because of similar responses from other endpoints that include `entrants`.
       operationId: getRaces
       responses:
         200:
@@ -214,7 +217,7 @@ paths:
       summary: Race detail
       description: |
         This endpoint covers everything you might want to know about a race. All the data shown on the race page, except for chat messages, is provided. A full breakdown of entrants is also here, which is sorted by race status and finish position, as appropriate.
-        
+
         **Note:** For races in progress, the timer is not part of the API response, since the API is cached it would be impossible to update this in real-time. To work out the timer, you should use the value of `started_at` (and the `X-Exact-Date` header to account for clock sync inaccuracy - see above) and `ended_at` (if the race has concluded).
       operationId: getRaceDetails
       parameters:
@@ -359,7 +362,7 @@ paths:
       summary: Past user races
       description: |
         Returns a list of all finished (but not cancelled) races that a user has entered. This list is paginated, and sorted by each race's completion time (the `ended_at` field), most recent first. 10 races are returned per page.
-        
+
         This endpoint behaves similarly to the past category races endpoint. Each race has the same data as the all races endpoint, unless you enable `show_entrants`. If enabled, the races will additionally list entrant data in the same format used by the race detail endpoint.
       operationId: getPastRacesByUser
       parameters:
@@ -448,7 +451,7 @@ components:
         format: date-time
       description: |
         As this site is about racing, timing is important to get right. Along with the JSON response, all API endpoints will also have an X-Exact-Date HTTP response header, which will contain the current date/time in standard ISO format, precise to the last millisecond. You can use this to account for differences between the server's clock and your local one, plus latency to the server.
-        
+
         Although datestamps are given with millisecond prevision, given the nature of the web and latency you should not assume the data given is actually accurate to that degree. As a rule, when displaying data times should be rounded to the nearest decisecond, at most.
   schemas:
     User:
@@ -494,7 +497,7 @@ components:
           type: string
           description: |
             The user's current flair, as a set of space-separated strings. This is used to indicate how the user should be styled. It should **not** be used to determine logical information, e.g. if a user is a moderator.
-            
+
             Note that flairs are *context-sensitive*. If you're getting category data for example, you'll never see a "monitor" flair since this only applies in the context of race rooms.
           example: monitor supporter
         twitch_name:
@@ -583,7 +586,7 @@ components:
         name:
           type: string
           description: The name of the category
-          example: |- 
+          example: |-
             The Legend of Zelda: Ocarina of Time Randomizer
         short_name:
           type: string
